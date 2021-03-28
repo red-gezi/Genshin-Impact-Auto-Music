@@ -1,0 +1,9 @@
+G:\VSProject\B站弹幕姬\原神自动弹奏器\bin\Debug\原神自动弹奏器.exe.config
+G:\VSProject\B站弹幕姬\原神自动弹奏器\bin\Debug\原神自动弹奏器.exe
+G:\VSProject\B站弹幕姬\原神自动弹奏器\bin\Debug\原神自动弹奏器.pdb
+G:\VSProject\B站弹幕姬\原神自动弹奏器\obj\Debug\原神自动弹奏器.csprojAssemblyReference.cache
+G:\VSProject\B站弹幕姬\原神自动弹奏器\obj\Debug\原神自动弹奏器.Form1.resources
+G:\VSProject\B站弹幕姬\原神自动弹奏器\obj\Debug\原神自动弹奏器.Properties.Resources.resources
+G:\VSProject\B站弹幕姬\原神自动弹奏器\obj\Debug\原神自动弹奏器.csproj.GenerateResource.cache
+G:\VSProject\B站弹幕姬\原神自动弹奏器\obj\Debug\原神自动弹奏器.exe
+G:\VSProject\B站弹幕姬\原神自动弹奏器\obj\Debug\原神自动弹奏器.pdb
