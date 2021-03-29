@@ -106,5 +106,10 @@ namespace 原神自动弹奏器
             return key;
         }
 
+        private void button1_Click(object sender, EventArgs e)
+        {
+            Record record = new Record();
+            record.ShowDialog();
+        }
     }
 }

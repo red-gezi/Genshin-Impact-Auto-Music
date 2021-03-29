@@ -37,6 +37,7 @@
             this.cb_mode = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.delayTime = new System.Windows.Forms.TextBox();
+            this.button1 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btn_play
@@ -100,13 +101,24 @@
             this.delayTime.Name = "delayTime";
             this.delayTime.Size = new System.Drawing.Size(100, 25);
             this.delayTime.TabIndex = 5;
-            this.delayTime.Text = "300";
+            this.delayTime.Text = "50";
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(571, 12);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 6;
+            this.button1.Text = "录制";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(752, 450);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.delayTime);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.cb_mode);
@@ -129,6 +141,7 @@
         private System.Windows.Forms.ComboBox cb_mode;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox delayTime;
+        private System.Windows.Forms.Button button1;
     }
 }
 
