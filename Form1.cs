@@ -1,8 +1,12 @@
-﻿using System;
+﻿using Melanchall.DryWetMidi.Core;
+using Melanchall.DryWetMidi.Interaction;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -15,9 +19,10 @@ namespace 原神自动弹奏器
     {
         bool isStop;
         Random rand = new Random();
-
+        public void Say(int i) => Console.WriteLine(i);
         public Form1()
         {
+            Form1_DragEnter(null, null);
             InitializeComponent();
         }
         string key = "";
@@ -49,9 +54,9 @@ namespace 原神自动弹奏器
                       {
                           key = GetKeyMap(music_score[i][j].ToString());
                           Console.Write(music_score[i][j].ToString());
-                          await Task.Delay(rand.Next(10));
+                          await Task.Delay(1);
                       }
-                      await Task.Delay(int.Parse(delayTime.Text) + rand.Next(20));
+                      await Task.Delay(int.Parse(delayTime.Text));
                       if (isStop)
                       {
                           break;
@@ -110,6 +115,58 @@ namespace 原神自动弹奏器
         {
             Record record = new Record();
             record.ShowDialog();
+        }
+
+        private void Form1_DragEnter(object sender, DragEventArgs e)
+        {
+            MidiFile midiFile = MidiFile.Read("卡农.mid");
+            Dictionary<string, string> noteDict = new Dictionary<string, string>{
+                {"C","A"},
+                {"D","S"},
+                {"E","D"},
+                {"F","F"},
+                {"G","G"},
+                {"A","H"},
+                {"B","J"},
+                {"CSharp","Q"},
+                {"DSharp","W"},
+                {"ESharp","E"},
+                {"FSharp","R"},
+                {"GSharp","T"},
+                {"ASharp","Y"},
+                {"BSharp","U"},
+            };
+            foreach (var trackChunk in midiFile.Chunks.OfType<TrackChunk>())
+            {
+                var list = trackChunk.ManageNotes().Notes.ToList();
+              File.WriteAllText( "note.json",JsonConvert.SerializeObject(list, Formatting.Indented));
+                if (list.Any())
+                {
+                    int start = (int)list[0].Time;
+                    int length = (int)list[0].Length;
+                    string music = "";
+                    list.Where(note => note.Channel == 0).ToList().Select(note =>
+                    new
+                    {
+                        note = noteDict[note.NoteName.ToString()],
+                        rank = (int)(note.Time - start) / length
+                    }).GroupBy(note => note.rank).ToList().Select(item =>
+                          new
+                          {
+                              rank = item.Key,
+                              notes = string.Join("", item.ToList().Select(x => x.note))
+                          }
+                      ).ToList().ForEach(note =>
+                      {
+                          music += note.notes.Length > 1 ? $"({note.notes})" : note.notes;
+                      });
+                    Console.WriteLine(music);
+                }
+                //Console.WriteLine(($" {noteDict[note.NoteName.ToString()]} {(note.Time - start) / length}")));
+                //Console.Write($"{]}"));
+                //Console.WriteLine(($" {note.NoteName.ToString()} {(note.Time - start) / length}")));
+            }
+            Console.WriteLine("音轨解析完毕");
         }
     }
 }

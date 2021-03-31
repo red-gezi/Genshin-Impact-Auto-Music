@@ -53,7 +53,7 @@
             // timer1
             // 
             this.timer1.Enabled = true;
-            this.timer1.Interval = 10;
+            this.timer1.Interval = 1;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // text_music
@@ -127,6 +127,7 @@
             this.Controls.Add(this.btn_play);
             this.Name = "Form1";
             this.Text = "原神自动演奏机 -- made by 格子";
+            this.DragEnter += new System.Windows.Forms.DragEventHandler(this.Form1_DragEnter);
             this.ResumeLayout(false);
             this.PerformLayout();
 
