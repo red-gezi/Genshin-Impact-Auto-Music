@@ -122,7 +122,7 @@ namespace 原神自动弹奏器
         {
             //MidiFile midiFile = MidiFile.Read("卡农（简易版）.mid");
             //MidiFile midiFile = MidiFile.Read("小星星.mid");
-            MidiFile midiFile = MidiFile.Read("C大调卡农.mid");
+            MidiFile midiFile = MidiFile.Read("欢乐颂.mid");
            
             foreach (var trackChunk in midiFile.Chunks.OfType<TrackChunk>())
             {
@@ -268,19 +268,23 @@ namespace 原神自动弹奏器
                                     notes = string.Join("", item.ToList().Select(x => x.note))
                                 }
                              ).ToList();
-                int endRank = tempNotes.Last().rank;
-                Enumerable.Range(0, endRank+1).ToList().ForEach(i =>
+                if (tempNotes.Any())
                 {
-                    var note = tempNotes.FirstOrDefault(tempNote => tempNote.rank == i);
-                    if (note != null)
+                    int endRank = tempNotes.Last().rank;
+                    Enumerable.Range(0, endRank + 1).ToList().ForEach(i =>
                     {
-                        output += note.notes.Length > 1 ? $"({note.notes})" : note.notes;
-                    }
-                    else
-                    {
-                        output += " ";
-                    }
-                });
+                        var note = tempNotes.FirstOrDefault(tempNote => tempNote.rank == i);
+                        if (note != null)
+                        {
+                            output += note.notes.Length > 1 ? $"({note.notes})" : note.notes;
+                        }
+                        else
+                        {
+                            output += " ";
+                        }
+                    });
+                }
+                
                 Console.WriteLine(output); ;
                 return output;
             }
