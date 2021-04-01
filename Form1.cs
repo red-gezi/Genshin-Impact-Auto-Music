@@ -120,143 +120,235 @@ namespace 原神自动弹奏器
         //////////////////////////////////////////////////////////////////midi谱解析（未完成）////////////////////////////////////////
         private void Form1_DragEnter(object sender, DragEventArgs e)
         {
-            int bias = 3;
             //MidiFile midiFile = MidiFile.Read("卡农（简易版）.mid");
-            //MidiFile midiFile = MidiFile.Read("小星星.mid"); 
-            MidiFile midiFile = MidiFile.Read("千年缘.mid");
-            //十二平均律到do-si
-            Dictionary<string, int> noteDict = new Dictionary<string, int>{
-                //{"C","A"},
-                //{"D","S"},
-                //{"E","D"},
-                //{"F","F"},
-                //{"G","G"},
-                //{"A","H"},
-                //{"B","J"},
-                {"CSharp",0},
-                {"DSharp",0},
-                {"ESharp",0},
-                {"FSharp",0},
-                {"GSharp",0},
-                {"ASharp",0},
-                {"BSharp",0},
-                {"C",1},
-                {"D",2},
-                {"E",3},
-                {"F",4},
-                {"G",5},
-                {"A",6},
-                {"B",7},
-            };
+            //MidiFile midiFile = MidiFile.Read("小星星.mid");
+            MidiFile midiFile = MidiFile.Read("C大调卡农.mid");
+           
             foreach (var trackChunk in midiFile.Chunks.OfType<TrackChunk>())
             {
                 var list = trackChunk.ManageNotes().Notes.ToList();
-                File.WriteAllText("note.json", JsonConvert.SerializeObject(list, Formatting.Indented));
                 if (list.Any())
                 {
+                    Midiutility.Init(0, -1);
                     int start = (int)list[0].Time;
                     int templength = ((int)list[0].Length);
                     int length = templength % 120 == 0 ? templength : ((templength / 120) + 1) * 120;
-                    string music = "";
-                    var tempNotes = list.Where(note => note.Channel == 0).ToList().Select(note =>
-                      new
-                      {
-                          note = noteDict[note.NoteName.ToString()] + bias,
-                          rank = (int)(note.Time - start) / length
-                      }).GroupBy(note => note.rank).ToList().Select(item =>
-                            new
-                            {
-                                rank = item.Key,
-                                notes = string.Join("", item.ToList().Select(x => x.note))
-                            }
-                         ).ToList();
-                    int endRank = tempNotes.Last().rank;
-                    Enumerable.Range(0, endRank).ToList().ForEach(i =>
+                    List<Note> targetNotes = list.Where(note => note.Channel == 0).ToList();
+                    targetNotes.ForEach(note =>
                     {
-                        var note = tempNotes.FirstOrDefault(tempNote => tempNote.rank == i);
-                        if (note != null)
-                        {
-                            music += note.notes.Length > 1 ? $"({note.notes})" : note.notes;
-                        }
-                        else
-                        {
-                            music += " ";
-                        }
+                        int rank = (int)(note.Time - start) / length;
+                        Midiutility.AddNote(new Midiutility.Note(rank, note.NoteName.ToString(), note.Octave));
                     });
-                    Console.WriteLine(music);
+                    var s = Midiutility.notes;
+                    Midiutility.OutputYuanShenPu();
+                    Console.WriteLine("音轨解析完毕");
                 }
             }
-            Console.WriteLine("音轨解析完毕");
         }
         //从do-si转化为原谱支持的范围
-        class Midi
+        public static class Midiutility
         {
             public static int noteBais = 0;
-
             public static int octaveBais = 0;
-
             public static List<Note> notes = new List<Note>();
-            public static int strandOctave => notes.Min(note => note.octave) + octaveBais;
-
-            public static void Add(Note note) => notes.Add(note);
+            public static int standardOctave => notes.Min(note => note.octave) + 1 + octaveBais;
             public class Note
             {
                 public int rank;
                 public int value;
                 public int octave;
-
+                public bool isSharp = false;
                 public Note(int rank, string noteName, int octave)
                 {
+                    Console.Write($"检测到音符 编号:{rank}-十二律为{noteName}-音度为{octave}------");
                     this.rank = rank;
                     switch (noteName)
                     {
                         case "C": value = 1; break;
+                        case "CSharp": value = 1; break;
                         case "D": value = 2; break;
+                        case "DSharp": value = 2; break;
                         case "E": value = 3; break;
                         case "F": value = 4; break;
+                        case "FSharp": value = 4; break;
                         case "G": value = 5; break;
+                        case "GSharp": value = 5; break;
                         case "A": value = 6; break;
+                        case "ASharp": value = 6; break;
                         case "B": value = 7; break;
-                        default:
-                            break;
+                        default: isSharp = true; break;
                     }
-                    if (value + noteBais < 1)
+                    value = value + noteBais;
+                    if (value < 1)
                     {
                         octave--;
+                        this.value = value % 7;
+
                     }
-                    else if (value + noteBais > 7)
+                    else if (value > 7)
                     {
                         octave++;
+                        this.value = value % 7;
+
                     }
-                    value = value % 7;
-                    this.value = value + noteBais;
                     this.octave = octave;
+                   Console.WriteLine($"录入该音符为-音度{octave}-音符{value}");
                 }
-                public void ToYuanPuNote()
+                public string ToYuanPuNote()
                 {
-                    if (octave == strandOctave - 1)
+                    if (octave == standardOctave - 1)
                     {
-
+                        switch (value)
+                        {
+                            case 1: return "Z";
+                            case 2: return "X";
+                            case 3: return "C";
+                            case 4: return "V";
+                            case 5: return "B";
+                            case 6: return "N";
+                            case 7: return "M";
+                            default: return " ";
+                        }
                     }
-                    else if (octave == strandOctave)
+                    else if (octave == standardOctave)
                     {
+                        switch (value)
+                        {
+                            case 1: return "A";
+                            case 2: return "S";
+                            case 3: return "D";
+                            case 4: return "F";
+                            case 5: return "G";
+                            case 6: return "H";
+                            case 7: return "J";
+                            default: return " ";
 
+                        }
                     }
-                    else if (octave == strandOctave + 1)
+                    else if (octave == standardOctave + 1)
                     {
-
+                        switch (value)
+                        {
+                            case 1: return "Q";
+                            case 2: return "W";
+                            case 3: return "E";
+                            case 4: return "R";
+                            case 5: return "T";
+                            case 6: return "Y";
+                            case 7: return "U";
+                            default: return " ";
+                        }
                     }
-                    else
-                    {
+                    return " ";
+                }
+            }
+            public static void Init(int note_Bais, int octave_Bais)
+            {
+                notes.Clear();
+                noteBais = note_Bais;
+                octaveBais = octave_Bais;
+            }
+            public static void AddNote(Note note)
+            {
+                if (!note.isSharp)//不加入半音阶
+                {
+                    notes.Add(note);
 
-                    }
                 }
             }
 
+            public static string OutputYuanShenPu()
+            {
+                string output = "";
+                var tempNotes = notes.Select(note => new { rank = note.rank, note = note.ToYuanPuNote() }).
+                    GroupBy(note => note.rank).ToList().Select(item =>
+                                new
+                                {
+                                    rank = item.Key,
+                                    notes = string.Join("", item.ToList().Select(x => x.note))
+                                }
+                             ).ToList();
+                int endRank = tempNotes.Last().rank;
+                Enumerable.Range(0, endRank+1).ToList().ForEach(i =>
+                {
+                    var note = tempNotes.FirstOrDefault(tempNote => tempNote.rank == i);
+                    if (note != null)
+                    {
+                        output += note.notes.Length > 1 ? $"({note.notes})" : note.notes;
+                    }
+                    else
+                    {
+                        output += " ";
+                    }
+                });
+                Console.WriteLine(output); ;
+                return output;
+            }
         }
-        public void GetYuanShenPu()
-        {
 
-        }
     }
 }
+
+
+//十二平均律到do-si
+//Dictionary<string, int> noteDict = new Dictionary<string, int>{
+//    //{"C","A"},
+//    //{"D","S"},
+//    //{"E","D"},
+//    //{"F","F"},
+//    //{"G","G"},
+//    //{"A","H"},
+//    //{"B","J"},
+//    {"CSharp",0},
+//    {"DSharp",0},
+//    {"ESharp",0},
+//    {"FSharp",0},
+//    {"GSharp",0},
+//    {"ASharp",0},
+//    {"BSharp",0},
+//    {"C",1},
+//    {"D",2},
+//    {"E",3},
+//    {"F",4},
+//    {"G",5},
+//    {"A",6},
+//    {"B",7},
+//};
+//foreach (var trackChunk in midiFile.Chunks.OfType<TrackChunk>())
+//{
+//    var list = trackChunk.ManageNotes().Notes.ToList();
+//    File.WriteAllText("note.json", JsonConvert.SerializeObject(list, Formatting.Indented));
+//    if (list.Any())
+//    {
+//        int start = (int)list[0].Time;
+//        int templength = ((int)list[0].Length);
+//        int length = templength % 120 == 0 ? templength : ((templength / 120) + 1) * 120;
+//        string music = "";
+//        var tempNotes = list.Where(note => note.Channel == 0).ToList().Select(note =>
+//          new
+//          {
+//              note = noteDict[note.NoteName.ToString()],
+//              rank = (int)(note.Time - start) / length
+//          }).GroupBy(note => note.rank).ToList().Select(item =>
+//                new
+//                {
+//                    rank = item.Key,
+//                    notes = string.Join("", item.ToList().Select(x => x.note))
+//                }
+//             ).ToList();
+//        int endRank = tempNotes.Last().rank;
+//        Enumerable.Range(0, endRank).ToList().ForEach(i =>
+//        {
+//            var note = tempNotes.FirstOrDefault(tempNote => tempNote.rank == i);
+//            if (note != null)
+//            {
+//                music += note.notes.Length > 1 ? $"({note.notes})" : note.notes;
+//            }
+//            else
+//            {
+//                music += " ";
+//            }
+//        });
+//        Console.WriteLine(music);
+//    }
+//}
