@@ -1,14 +1,9 @@
 ﻿using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Interaction;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -18,14 +13,19 @@ namespace 原神自动弹奏器
     public partial class Form1 : Form
     {
         bool isStop;
-        Random rand = new Random();
         public void Say(int i) => Console.WriteLine(i);
         public Form1()
         {
-            Form1_DragEnter(null, null);
             InitializeComponent();
+            cb_mode.SelectedIndex = 1;
+            text_music.AllowDrop = true;
+            KeyBoardListenerr.GetKeyDownEvent((key) =>
+            {
+                if (key == "I") btn_play_Click(null, null);
+                if (key == "O") btn_Stop_Click(null, null);
+            });
         }
-        string key = "";
+         string key = "";
         private void btn_play_Click(object sender, EventArgs e)
         {
             isStop = false;
@@ -57,10 +57,7 @@ namespace 原神自动弹奏器
                           await Task.Delay(1);
                       }
                       await Task.Delay(int.Parse(delayTime.Text));
-                      if (isStop)
-                      {
-                          break;
-                      }
+                      if (isStop) { break; }
                   }
               });
         }
@@ -120,16 +117,30 @@ namespace 原神自动弹奏器
         //////////////////////////////////////////////////////////////////midi谱解析（未完成）////////////////////////////////////////
         private void Form1_DragEnter(object sender, DragEventArgs e)
         {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.All;
+
+            }
+            else
+            {
+                e.Effect = DragDropEffects.None;
+            }
+        }
+
+        private void Form1_DragDrop(object sender, DragEventArgs e)
+        {
             //MidiFile midiFile = MidiFile.Read("卡农（简易版）.mid");
             //MidiFile midiFile = MidiFile.Read("小星星.mid");
-            MidiFile midiFile = MidiFile.Read("欢乐颂.mid");
-           
+            string path = ((System.Array)e.Data.GetData(DataFormats.FileDrop)).GetValue(0).ToString();
+            MidiFile midiFile = MidiFile.Read(path);
+
             foreach (var trackChunk in midiFile.Chunks.OfType<TrackChunk>())
             {
                 var list = trackChunk.ManageNotes().Notes.ToList();
                 if (list.Any())
                 {
-                    Midiutility.Init(0, -1);
+                    MidiUtility.Init(0, -1);
                     int start = (int)list[0].Time;
                     int templength = ((int)list[0].Length);
                     int length = templength % 120 == 0 ? templength : ((templength / 120) + 1) * 120;
@@ -137,16 +148,16 @@ namespace 原神自动弹奏器
                     targetNotes.ForEach(note =>
                     {
                         int rank = (int)(note.Time - start) / length;
-                        Midiutility.AddNote(new Midiutility.Note(rank, note.NoteName.ToString(), note.Octave));
+                        MidiUtility.AddNote(new MidiUtility.Note(rank, note.NoteName.ToString(), note.Octave));
                     });
-                    var s = Midiutility.notes;
-                    Midiutility.OutputYuanShenPu();
+                    var s = MidiUtility.notes;
+                    MidiUtility.OutputYuanShenPu();
                     Console.WriteLine("音轨解析完毕");
                 }
             }
         }
         //从do-si转化为原谱支持的范围
-        public static class Midiutility
+        public static class MidiUtility
         {
             public static int noteBais = 0;
             public static int octaveBais = 0;
@@ -192,7 +203,7 @@ namespace 原神自动弹奏器
 
                     }
                     this.octave = octave;
-                   Console.WriteLine($"录入该音符为-音度{octave}-音符{value}");
+                    Console.WriteLine($"录入该音符为-音度{octave}-音符{value}");
                 }
                 public string ToYuanPuNote()
                 {
@@ -284,75 +295,12 @@ namespace 原神自动弹奏器
                         }
                     });
                 }
-                
+
                 Console.WriteLine(output); ;
                 return output;
             }
         }
 
+
     }
 }
-
-
-//十二平均律到do-si
-//Dictionary<string, int> noteDict = new Dictionary<string, int>{
-//    //{"C","A"},
-//    //{"D","S"},
-//    //{"E","D"},
-//    //{"F","F"},
-//    //{"G","G"},
-//    //{"A","H"},
-//    //{"B","J"},
-//    {"CSharp",0},
-//    {"DSharp",0},
-//    {"ESharp",0},
-//    {"FSharp",0},
-//    {"GSharp",0},
-//    {"ASharp",0},
-//    {"BSharp",0},
-//    {"C",1},
-//    {"D",2},
-//    {"E",3},
-//    {"F",4},
-//    {"G",5},
-//    {"A",6},
-//    {"B",7},
-//};
-//foreach (var trackChunk in midiFile.Chunks.OfType<TrackChunk>())
-//{
-//    var list = trackChunk.ManageNotes().Notes.ToList();
-//    File.WriteAllText("note.json", JsonConvert.SerializeObject(list, Formatting.Indented));
-//    if (list.Any())
-//    {
-//        int start = (int)list[0].Time;
-//        int templength = ((int)list[0].Length);
-//        int length = templength % 120 == 0 ? templength : ((templength / 120) + 1) * 120;
-//        string music = "";
-//        var tempNotes = list.Where(note => note.Channel == 0).ToList().Select(note =>
-//          new
-//          {
-//              note = noteDict[note.NoteName.ToString()],
-//              rank = (int)(note.Time - start) / length
-//          }).GroupBy(note => note.rank).ToList().Select(item =>
-//                new
-//                {
-//                    rank = item.Key,
-//                    notes = string.Join("", item.ToList().Select(x => x.note))
-//                }
-//             ).ToList();
-//        int endRank = tempNotes.Last().rank;
-//        Enumerable.Range(0, endRank).ToList().ForEach(i =>
-//        {
-//            var note = tempNotes.FirstOrDefault(tempNote => tempNote.rank == i);
-//            if (note != null)
-//            {
-//                music += note.notes.Length > 1 ? $"({note.notes})" : note.notes;
-//            }
-//            else
-//            {
-//                music += " ";
-//            }
-//        });
-//        Console.WriteLine(music);
-//    }
-//}
