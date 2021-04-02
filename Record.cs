@@ -37,37 +37,7 @@ namespace 原神自动弹奏器
                     Music.Add(DateTime.Now, key);
                 }
             });
-        }
-        //public static void Response(string key)
-        //{
-        //    if (key == "P")
-        //    {
-        //        if (!isStart)
-        //        {
-
-        //            Music.Start(DateTime.Now);
-        //            isStart = true;
-        //        }
-        //        else
-        //        {
-        //            Music.End();
-        //            isStart = false;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        Music.Add(DateTime.Now, key);
-        //    }
-        //    //if (key == "I")
-        //    //{
-        //    //    btn_play_Click(null, null);
-        //    //}
-        //    //if (key == "O")
-        //    //{
-        //    //    btn_Stop_Click(null, null);
-        //    //}
-
-        //}
+        } 
         class Music
         {
             static DateTime startTime;
