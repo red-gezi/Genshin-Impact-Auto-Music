@@ -13,7 +13,6 @@ namespace 原神自动弹奏器
     public partial class Form1 : Form
     {
         bool isStop;
-        public void Say(int i) => Console.WriteLine(i);
         public Form1()
         {
             InitializeComponent();
@@ -25,7 +24,6 @@ namespace 原神自动弹奏器
                 if (key == "O") btn_Stop_Click(null, null);
             });
         }
-         string key = "";
         private void btn_play_Click(object sender, EventArgs e)
         {
             isStop = false;
@@ -52,29 +50,19 @@ namespace 原神自动弹奏器
                       music_score[i] = music_score[i].Replace("(", "").Replace(")", "");
                       for (int j = 0; j < music_score[i].Count(); j++)
                       {
-                          key = GetKeyMap(music_score[i][j].ToString());
+                          string key = GetKeyMap(music_score[i][j].ToString());
                           Console.Write(music_score[i][j].ToString());
-                          await Task.Delay(1);
+                          Action keyAction = () => SendKeys.Send(key);
+                          Invoke(keyAction);
+                          //await Task.Delay(1);
                       }
                       await Task.Delay(int.Parse(delayTime.Text));
                       if (isStop) { break; }
                   }
               });
         }
-        private void btn_Stop_Click(object sender, EventArgs e)
-        {
-            isStop = true;
-        }
-
-        private void timer1_Tick(object sender, EventArgs e)
-        {
-            if (key != "")
-            {
-                SendKeys.Send(key);
-                key = "";
-            }
-        }
-        //////////////////////////////////////////////////////////////////字母谱////////////////////////////////////////
+        private void btn_Stop_Click(object sender, EventArgs e) => isStop = true;
+        //////////////////////////////////////////////////////////////////数字谱转字母谱////////////////////////////////////////
         public string GetKeyMap(string keycode)
         {
             string key = "";
@@ -130,17 +118,16 @@ namespace 原神自动弹奏器
 
         private void Form1_DragDrop(object sender, DragEventArgs e)
         {
-            //MidiFile midiFile = MidiFile.Read("卡农（简易版）.mid");
-            //MidiFile midiFile = MidiFile.Read("小星星.mid");
-            string path = ((System.Array)e.Data.GetData(DataFormats.FileDrop)).GetValue(0).ToString();
+            string path = ((Array)e.Data.GetData(DataFormats.FileDrop)).GetValue(0).ToString();
             MidiFile midiFile = MidiFile.Read(path);
-
+            ImportMidiForm importMidiForm = new ImportMidiForm();
+            importMidiForm.clickAction = MidiUtility.Init;
+            importMidiForm.ShowDialog();
             foreach (var trackChunk in midiFile.Chunks.OfType<TrackChunk>())
             {
                 var list = trackChunk.ManageNotes().Notes.ToList();
                 if (list.Any())
                 {
-                    MidiUtility.Init(0, -1);
                     int start = (int)list[0].Time;
                     int templength = ((int)list[0].Length);
                     int length = templength % 120 == 0 ? templength : ((templength / 120) + 1) * 120;
@@ -161,6 +148,7 @@ namespace 原神自动弹奏器
         {
             public static int noteBais = 0;
             public static int octaveBais = 0;
+            public static bool isDebugMode = false;
             public static List<Note> notes = new List<Note>();
             public static int standardOctave => notes.Min(note => note.octave) + 1 + octaveBais;
             public class Note
@@ -171,7 +159,8 @@ namespace 原神自动弹奏器
                 public bool isSharp = false;
                 public Note(int rank, string noteName, int octave)
                 {
-                    Console.Write($"检测到音符 编号:{rank}-十二律为{noteName}-音度为{octave}------");
+                   
+                    if (isDebugMode) Console.Write($"检测到音符 编号:{rank}-音度为{octave}-十二律为{noteName}------");
                     this.rank = rank;
                     switch (noteName)
                     {
@@ -203,7 +192,7 @@ namespace 原神自动弹奏器
 
                     }
                     this.octave = octave;
-                    Console.WriteLine($"录入该音符为-音度{octave}-音符{value}");
+                    if (isDebugMode) Console.WriteLine($"录入该音符为-音度{octave}-音符{value}");
                 }
                 public string ToYuanPuNote()
                 {
@@ -253,11 +242,12 @@ namespace 原神自动弹奏器
                     return " ";
                 }
             }
-            public static void Init(int note_Bais, int octave_Bais)
+            public static void Init(int noteBais, int octaveBais, bool isDebugMode)
             {
                 notes.Clear();
-                noteBais = note_Bais;
-                octaveBais = octave_Bais;
+                MidiUtility.noteBais = noteBais;
+                MidiUtility.octaveBais = octaveBais;
+                MidiUtility.isDebugMode = isDebugMode;
             }
             public static void AddNote(Note note)
             {

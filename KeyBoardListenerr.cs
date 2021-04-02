@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 class KeyBoardListenerr
 {
     ///////////////////////////////////////////下面是看不懂的win API区域///////////////////////////////////////////////////
+    ///该类作用在于放在后台也能检测到键盘输入
     static WindowsHookCallBack s_callback;
 
     public static void GetKeyDownEvent(Action<string> response)
@@ -12,8 +13,8 @@ class KeyBoardListenerr
         {
             if (status == KeyBoredHookStatus.WM_KEYDOWN)
             {
-                    //代码
-                    Console.WriteLine($"{status} 虚拟码{(char)data.vkCode}");
+                //代码
+                //Console.Write($"{status} 虚拟码{(char)data.vkCode}");
                 response(((char)data.vkCode).ToString().ToUpper());
             }
         });

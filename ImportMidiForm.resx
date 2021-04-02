@@ -117,30 +117,4 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="text_music.Text" xml:space="preserve">
-    <value>A-DGQ B-SGJ N-ADH C-MSG
-V-NAF Z-BAD V-NAF B-MSG
-(AE)-DGQ (BW)-MSG (QN)-ADH (JC)-MDG
-(HV)(HV)NAF (GZ)(GZ)CBA (HV)(HV)NAF (JB)(JB)MSG 
-QJQA (MX)GSD (CA)QJH (CJ)ETY 
-(VR)EWR (EZ)WQJ (VH)GFD (BS)FDS 
-(BJ)SDF (BM)SGF (ND)HGF (CG)FDS 
-(VA)NHJ (ZQ)JHG (VF)DSH GHG 
-
-(TD)ERTT ER(TB)GHJQWER 
-(NE)QWEE DF(MG)HGFGDFG 
-(NF)HGFF DS(DB)SASDFGH 
-(NF)HGHH JQ(MG)HJQWERT 
-(TD)ERTT ER(TB)GHJQWER 
-(NE)QWEE DF(MG)HGFGDFG 
-(NF)HGFF DS(DB)SASDFGH 
-(NF)HGHH JQ(MG)HJQWERT 
-
-(AE)-DGQ (BW)-MSG (QN)-ADH (JC)-MDG  
-(HV)-NAF (GZ)-CBA (HV)-NAF (JB) 
-
-(AE)-DGQ (BW)-MSG (QN)-ADH (JC)-MDG
-(HV)-NAF (GZ)-CBA (HV)-NAF (JB)
-</value>
-  </data>
 </root>

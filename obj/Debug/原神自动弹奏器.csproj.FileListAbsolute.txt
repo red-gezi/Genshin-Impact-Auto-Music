@@ -32,3 +32,4 @@ E:\gezi\Genshin-Impact-Auto-Music\obj\Debug\原神自动弹奏器.exe
 E:\gezi\Genshin-Impact-Auto-Music\obj\Debug\原神自动弹奏器.pdb
 E:\gezi\Genshin-Impact-Auto-Music\bin\Debug\System.Diagnostics.DiagnosticSource.xml
 E:\gezi\Genshin-Impact-Auto-Music\obj\Debug\原神自动弹奏器.csproj.Fody.CopyLocal.cache
+E:\gezi\Genshin-Impact-Auto-Music\obj\Debug\原神自动弹奏器.ImportMidiForm.resources

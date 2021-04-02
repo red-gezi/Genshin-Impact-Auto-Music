@@ -28,10 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.btn_play = new System.Windows.Forms.Button();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.text_music = new System.Windows.Forms.TextBox();
             this.btn_Stop = new System.Windows.Forms.Button();
             this.cb_mode = new System.Windows.Forms.ComboBox();
@@ -50,12 +48,6 @@
             this.btn_play.Text = "演奏";
             this.btn_play.UseVisualStyleBackColor = true;
             this.btn_play.Click += new System.EventHandler(this.btn_play_Click);
-            // 
-            // timer1
-            // 
-            this.timer1.Enabled = true;
-            this.timer1.Interval = 1;
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // text_music
             // 
@@ -147,7 +139,6 @@
         #endregion
 
         private System.Windows.Forms.Button btn_play;
-        private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.TextBox text_music;
         private System.Windows.Forms.Button btn_Stop;
         private System.Windows.Forms.ComboBox cb_mode;
