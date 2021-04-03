@@ -3,6 +3,7 @@ using Melanchall.DryWetMidi.Interaction;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -22,6 +23,11 @@ namespace 原神自动弹奏器
             {
                 if (key == "I") btn_play_Click(null, null);
                 if (key == "O") btn_Stop_Click(null, null);
+            });
+            Task.Run(() =>
+            {
+                string path = Console.ReadLine();
+                Console.WriteLine("开始加载midi谱" + new FileInfo(path).Name);
             });
         }
         private void btn_play_Click(object sender, EventArgs e)
@@ -105,10 +111,10 @@ namespace 原神自动弹奏器
         //////////////////////////////////////////////////////////////////midi谱解析（未完成）////////////////////////////////////////
         private void Form1_DragEnter(object sender, DragEventArgs e)
         {
+            Console.WriteLine("ss");
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 e.Effect = DragDropEffects.All;
-
             }
             else
             {
@@ -119,29 +125,7 @@ namespace 原神自动弹奏器
         private void Form1_DragDrop(object sender, DragEventArgs e)
         {
             string path = ((Array)e.Data.GetData(DataFormats.FileDrop)).GetValue(0).ToString();
-            MidiFile midiFile = MidiFile.Read(path);
-            ImportMidiForm importMidiForm = new ImportMidiForm();
-            importMidiForm.clickAction = MidiUtility.Init;
-            importMidiForm.ShowDialog();
-            foreach (var trackChunk in midiFile.Chunks.OfType<TrackChunk>())
-            {
-                var list = trackChunk.ManageNotes().Notes.ToList();
-                if (list.Any())
-                {
-                    int start = (int)list[0].Time;
-                    int templength = ((int)list[0].Length);
-                    int length = templength % 120 == 0 ? templength : ((templength / 120) + 1) * 120;
-                    List<Note> targetNotes = list.Where(note => note.Channel == 0).ToList();
-                    targetNotes.ForEach(note =>
-                    {
-                        int rank = (int)(note.Time - start) / length;
-                        MidiUtility.AddNote(new MidiUtility.Note(rank, note.NoteName.ToString(), note.Octave));
-                    });
-                    var s = MidiUtility.notes;
-                    MidiUtility.OutputYuanShenPu();
-                    Console.WriteLine("音轨解析完毕");
-                }
-            }
+
         }
         //从do-si转化为原谱支持的范围
         public static class MidiUtility
@@ -159,7 +143,7 @@ namespace 原神自动弹奏器
                 public bool isSharp = false;
                 public Note(int rank, string noteName, int octave)
                 {
-                   
+
                     if (isDebugMode) Console.Write($"检测到音符 编号:{rank}-音度为{octave}-十二律为{noteName}------");
                     this.rank = rank;
                     switch (noteName)
@@ -291,6 +275,38 @@ namespace 原神自动弹奏器
             }
         }
 
+        private void cm_midi_Click(object sender, EventArgs e)
+        {
+            Console.WriteLine("加载喵");
+            cm_midi.Items.Clear();
+            cm_midi.Items.AddRange(new DirectoryInfo(Directory.GetCurrentDirectory()).GetFiles("*.mid", SearchOption.AllDirectories));
+        }
 
+        private void btn__load_Click(object sender, EventArgs e)
+        {
+            MidiFile midiFile = MidiFile.Read(((FileInfo)cm_midi.SelectedItem).FullName);
+            ImportMidiForm importMidiForm = new ImportMidiForm();
+            importMidiForm.clickAction = MidiUtility.Init;
+            importMidiForm.ShowDialog();
+            foreach (var trackChunk in midiFile.Chunks.OfType<TrackChunk>())
+            {
+                var list = trackChunk.ManageNotes().Notes.ToList();
+                if (list.Any())
+                {
+                    int start = (int)list[0].Time;
+                    int templength = ((int)list[0].Length);
+                    int length = templength % 120 == 0 ? templength : ((templength / 120) + 1) * 120;
+                    List<Note> targetNotes = list.Where(note => note.Channel == 0).ToList();
+                    targetNotes.ForEach(note =>
+                    {
+                        int rank = (int)(note.Time - start) / length;
+                        MidiUtility.AddNote(new MidiUtility.Note(rank, note.NoteName.ToString(), note.Octave));
+                    });
+                    var s = MidiUtility.notes;
+                    MidiUtility.OutputYuanShenPu();
+                    Console.WriteLine("音轨解析完毕");
+                }
+            }
+        }
     }
 }
