@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using Commons.Music.Midi;
 using System.IO;
 
 namespace 原神自动弹奏器
@@ -14,6 +13,7 @@ namespace 原神自动弹奏器
         public static int noteBais = 0;
         public static int octaveBais = 0;
         public static bool isDebugMode = false;
+        private static int delatTime;
         public static List<NoteScore> notes = new List<NoteScore>();
         public static int standardOctave => notes.Min(note => note.octave) + 1 + octaveBais;
         public class NoteScore
@@ -108,12 +108,13 @@ namespace 原神自动弹奏器
                 return " ";
             }
         }
-        public static void Init(int noteBais, int octaveBais, bool isDebugMode)
+        public static void Init(int noteBais, int octaveBais, bool isDebugMode,int delatTime)
         {
             notes.Clear();
             MidiUtility.noteBais = noteBais;
             MidiUtility.octaveBais = octaveBais;
             MidiUtility.isDebugMode = isDebugMode;
+            MidiUtility.delatTime = delatTime;
         }
         public static void AddNote(NoteScore note)
         {
@@ -122,16 +123,6 @@ namespace 原神自动弹奏器
                 notes.Add(note);
 
             }
-        }
-        public static int GetBPM(FileInfo midnFIle)
-        {
-            var access = MidiAccessManager.Default;
-            var output = access.OpenOutputAsync(access.Outputs.Last().Id).Result;
-            var music = MidiMusic.Read(File.OpenRead(midnFIle.FullName));
-            var player = new MidiPlayer(music, output);
-            int bpm = player.Bpm;
-            player.Dispose();
-            return bpm;
         }
         public static string TransToYuanShenPu()
         {
@@ -191,7 +182,7 @@ namespace 原神自动弹奏器
                     Console.WriteLine("bpm为" + bpm);
                     targetNotes.ForEach(note =>
                     {
-                        int rank = (int)(note.Time - start) / bpm;
+                        int rank = (int)(note.Time - start) / delatTime;
                         MidiUtility.AddNote(new MidiUtility.NoteScore(rank, note.NoteName.ToString(), note.Octave));
                     });
                     //var s = MidiUtility.notes;
