@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Runtime.InteropServices;
 
 class KeyBoardListenerr
 {
+   static bool isCtrlDown = false;
     ///////////////////////////////////////////下面是看不懂的win API区域///////////////////////////////////////////////////
     ///该类作用在于放在后台也能检测到键盘输入
     static WindowsHookCallBack s_callback;
@@ -11,11 +13,17 @@ class KeyBoardListenerr
     {
         s_callback = CreateCallBack((status, data) =>
         {
-            if (status == KeyBoredHookStatus.WM_KEYDOWN)
+            if (data.vkCode == 162)//判断按下的是否是ctrl
+            {
+                isCtrlDown = status== KeyBoredHookStatus.WM_KEYDOWN; 
+            }
+            else if (status == KeyBoredHookStatus.WM_KEYDOWN)
             {
                 //代码
-                //Console.Write($"{status} 虚拟码{(char)data.vkCode}");
-                response(((char)data.vkCode).ToString().ToUpper());
+
+                //Console.WriteLine($"{status} 虚拟码{(char)data.vkCode}");
+                string key = (isCtrlDown ? "Ctrl" : "" )+ (((char)data.vkCode).ToString().ToUpper());
+                response(key);
             }
         });
         IntPtr intPtr = SetWindowsHookEx(WindowsHookType.WH_KEYBOARD_LL, s_callback, IntPtr.Zero, 0);
@@ -51,6 +59,7 @@ class KeyBoardListenerr
         //全局鼠标钩子
         WH_MOUSE_LL = 14,
     }
+    ///////////////////////////////////////////下面是看不懂的win API区域///////////////////////////////////////////////////
 
     //所有钩子函数的参数都一样，问题在于如何解释参数
     delegate IntPtr WindowsHookCallBack(int nCode, int wParam, IntPtr lParam);

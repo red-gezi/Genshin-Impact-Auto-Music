@@ -19,7 +19,7 @@ namespace 原神自动弹奏器
             InitializeComponent();
             KeyBoardListenerr.GetKeyDownEvent((key) =>
             {
-                if (key == "P")
+                if (key == "CtrlP")
                 {
                     if (!isStart)
                     {
