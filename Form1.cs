@@ -116,17 +116,20 @@ namespace 原神自动弹奏器
             cm_midi.Items.Clear();
             cm_midi.Items.AddRange(new DirectoryInfo(Directory.GetCurrentDirectory()).GetFiles("*.mid", SearchOption.AllDirectories));
         }
+        private void cm_midi_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            FileInfo midiFile = (FileInfo)cm_midi.SelectedItem;
+            MidiUtility.Analysics(midiFile);
+        }
         private void btn__load_Click(object sender, EventArgs e)
         {
             FileInfo midiFile = (FileInfo)cm_midi.SelectedItem;
-            //MidiFile midiFile = MidiFile.Read(((FileInfo)cm_midi.SelectedItem).FullName);
             ImportMidiForm importMidiForm = new ImportMidiForm();
             importMidiForm.clickAction = MidiUtility.Init;
             importMidiForm.ShowDialog();
             text_music.Text = MidiUtility.Export(midiFile);
         }
 
-
-
+       
     }
 }

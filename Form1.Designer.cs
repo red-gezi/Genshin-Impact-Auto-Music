@@ -135,6 +135,7 @@
             this.cm_midi.Name = "cm_midi";
             this.cm_midi.Size = new System.Drawing.Size(159, 23);
             this.cm_midi.TabIndex = 7;
+            this.cm_midi.SelectedIndexChanged += new System.EventHandler(this.cm_midi_SelectedIndexChanged);
             this.cm_midi.Click += new System.EventHandler(this.cm_midi_Click);
             // 
             // btn__load
@@ -167,6 +168,7 @@
             this.Controls.Add(this.btn_Stop);
             this.Controls.Add(this.text_music);
             this.Controls.Add(this.btn_play);
+            this.DoubleBuffered = true;
             this.ForeColor = System.Drawing.SystemColors.ControlText;
             this.KeyPreview = true;
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
