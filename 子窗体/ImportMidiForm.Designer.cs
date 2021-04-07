@@ -35,6 +35,7 @@
             this.btn_Import = new System.Windows.Forms.Button();
             this.isDebugMode = new System.Windows.Forms.CheckBox();
             this.time = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // note_Bais
@@ -106,11 +107,22 @@
             this.time.TabIndex = 6;
             this.time.Text = "120";
             // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(384, 34);
+            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(97, 15);
+            this.label3.TabIndex = 7;
+            this.label3.Text = "音符间隔长度";
+            // 
             // ImportMidiForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(522, 182);
+            this.Controls.Add(this.label3);
             this.Controls.Add(this.time);
             this.Controls.Add(this.isDebugMode);
             this.Controls.Add(this.btn_Import);
@@ -135,5 +147,6 @@
         private System.Windows.Forms.Button btn_Import;
         private System.Windows.Forms.CheckBox isDebugMode;
         private System.Windows.Forms.TextBox time;
+        private System.Windows.Forms.Label label3;
     }
 }
