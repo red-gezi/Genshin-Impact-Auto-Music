@@ -10,6 +10,7 @@ namespace 原神自动弹奏器
 {
     public static class MidiUtility
     {
+        enum Temperament{C, CSharp, D, DSharp, E, F, FSharp, G, GSharp, A, ASharp, B}
         public static int noteBais = 0;
         public static int octaveBais = 0;
         public static bool isDebugMode = false;
@@ -27,36 +28,31 @@ namespace 原神自动弹奏器
 
                 if (isDebugMode) Console.Write($"检测到音符 编号:{rank}-音度为{octave}-十二律为{noteName}------");
                 this.rank = rank;
-                switch (noteName)
-                {
-                    case "C": value = 1; break;
-                    //case "CSharp": value = 1; break;
-                    case "D": value = 2; break;
-                    //case "DSharp": value = 2; break;
-                    case "E": value = 3; break;
-                    case "F": value = 4; break;
-                    //case "FSharp": value = 4; break;
-                    case "G": value = 5; break;
-                    //case "GSharp": value = 5; break;
-                    case "A": value = 6; break;
-                    //case "ASharp": value = 6; break;
-                    case "B": value = 7; break;
-                    default: isSharp = true; break;
-                }
-                value = value + noteBais;
-                if (value < 1)
+                Temperament currentNote = (Temperament)Enum.Parse(typeof(Temperament), noteName);
+                currentNote = currentNote - noteBais;
+                if ((int)currentNote < 1)
                 {
                     octave--;
-                    this.value = value % 7;
-
+                    currentNote = currentNote + 12;
                 }
-                else if (value > 7)
+                else if ((int)currentNote > 12)
                 {
                     octave++;
-                    this.value = value % 7;
-
+                    currentNote = (Temperament)((int)currentNote % 12);
                 }
                 this.octave = octave;
+                switch (currentNote)
+                {
+                    case Temperament.C: value = 1; break;
+                    case Temperament.D: value = 2; break;
+                    case Temperament.E: value = 3; break;
+                    case Temperament.F: value = 4; break;
+                    case Temperament.G: value = 5; break;
+                    case Temperament.A: value = 6; break;
+                    case Temperament.B: value = 7; break;
+                    default: isSharp = true; break;
+                }
+
                 if (isDebugMode) Console.WriteLine($"录入该音符为-音度{octave}-音符{value}");
             }
             public string ToYuanPuNote()
@@ -80,13 +76,13 @@ namespace 原神自动弹奏器
                 {
                     switch (value)
                     {
-                        case 1: return isToNumberPu ? "1." : "A";
-                        case 2: return isToNumberPu ? "2." : "S";
-                        case 3: return isToNumberPu ? "3." : "D";
-                        case 4: return isToNumberPu ? "4." : "F";
-                        case 5: return isToNumberPu ? "5." : "G";
-                        case 6: return isToNumberPu ? "6." : "H";
-                        case 7: return isToNumberPu ? "7." : "J";
+                        case 1: return isToNumberPu ? "1" : "A";
+                        case 2: return isToNumberPu ? "2" : "S";
+                        case 3: return isToNumberPu ? "3" : "D";
+                        case 4: return isToNumberPu ? "4" : "F";
+                        case 5: return isToNumberPu ? "5" : "G";
+                        case 6: return isToNumberPu ? "6" : "H";
+                        case 7: return isToNumberPu ? "7" : "J";
                         default: return " ";
 
                     }
@@ -121,7 +117,6 @@ namespace 原神自动弹奏器
             if (!note.isSharp)//不加入半音阶
             {
                 notes.Add(note);
-
             }
         }
         public static string TransToYuanShenPu()
@@ -155,6 +150,8 @@ namespace 原神自动弹奏器
             Console.WriteLine(output); ;
             return output;
         }
+
+        static int[] mainFrequent = new int[] { 0, 2, 4, 5, 7, 9, 11 };
         public static void Analysics(FileInfo midiFileInfo)
         {
             Console.WriteLine($"//////////////////////////////////开始解析{midiFileInfo.Name}////////////////////////////////////////////////");
@@ -166,21 +163,65 @@ namespace 原神自动弹奏器
                 var targetNotes = trackChunk.ManageNotes().Notes.Where(note => note.Channel == 0).ToList();
                 if (targetNotes.Any())
                 {
-                    Console.WriteLine("----------------开始解析音轨" + i+"-----------------------");
+                    Console.WriteLine("----------------开始解析音轨" + i + "-----------------------");
                     var notesTime = targetNotes.Select(x => (int)x.Time).Distinct().ToList();
                     var datas = Enumerable.Range(0, notesTime.Count()).ToList().Select(num => new { 音符播放时间 = notesTime[num], 与上一音符间隔时间 = notesTime[num] - (num == 0 ? 0 : notesTime[num - 1]) });
                     Console.WriteLine("----------打印音符间存在时间间隔及数量");
-                    datas.GroupBy(data => data.与上一音符间隔时间).OrderBy(time=>time.Key).ToList().ForEach(data => Console.WriteLine("间隔" + data.Key + "数量为" + data.Count()));
+                    var timeList = datas.GroupBy(data => data.与上一音符间隔时间).OrderBy(time => time.Key).ToList();
+                    timeList.ForEach(data =>
+                    {
+                        Console.Write("音符间隔长度为 ");
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.Write(data.Key);
+                        Console.ForegroundColor = ConsoleColor.Gray;
+                        Console.WriteLine(" 数量为" + data.Count());
+                    });
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.WriteLine("出现次数最多的前六种间隔为");
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    timeList.OrderByDescending(x => x.Count()).ToList().Take(6).OrderBy(x => x.Key).ToList().ForEach(time => Console.Write(time.Key + " "));
+                    Console.ForegroundColor = ConsoleColor.Gray;
                     Console.WriteLine();
+                    Console.ForegroundColor = ConsoleColor.White;
                     Console.WriteLine("----------包含的十二平均律为");
                     var notelist = targetNotes.GroupBy(note => note.NoteName).OrderBy(x => x.Key).ToList();
-                    notelist.ForEach(noteName => Console.WriteLine(noteName.Key+"\t数量为"+noteName.Count()));
+                    notelist.ForEach(noteName =>
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.Write(noteName.Key);
+                        Console.ForegroundColor = ConsoleColor.Gray;
+                        Console.WriteLine("\t数量为" + noteName.Count());
+                    });
+                    Console.ForegroundColor = ConsoleColor.White;
                     Console.WriteLine(notelist.Count < 8 ? "数量小于8，大概可以解析" : "数量大于7,可能有和弦,解析效果不好");
+                    //识图匹配调式
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.WriteLine("最多采用的七个频率为：");
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    var useNoteList = notelist.OrderByDescending(note => note.Count()).Take(7).OrderBy(note => note.Key).ToList();
+                    useNoteList.ForEach(note => Console.Write(note.Key + " "));
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                    Console.WriteLine("可能为以下调试：");
+                    var freList = Enumerable.Range(0, 12).ToList().Select(frequent =>
+                    {
+                        var result = useNoteList.Select(noteName =>
+                        {
+                            int currentNoteRank = ((int)(Temperament)Enum.Parse(typeof(Temperament), noteName.Key.ToString()));
+                            return mainFrequent.Contains(currentNoteRank - frequent);
+                        });
+                        return new { name = (Temperament)frequent, count = result.Count(x => x) };
+                    });
+                    freList.OrderByDescending(x => x.count).ThenBy(x => x.name).Take(4).ToList().ForEach(fre => Console.WriteLine($"{fre.name}:满足{fre.count}个频率"));
                     Console.WriteLine();
                     Console.WriteLine("----------包含的八度为");
                     var octavelist = targetNotes.GroupBy(note => note.Octave).OrderBy(x => x.Key).ToList();
-                    octavelist.ForEach(octave => Console.WriteLine(octave.Key + "\t数量为" + octave.Count()));
-                    //Console.WriteLine("可能为x调");
+                    octavelist.ForEach(octave =>
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.Write(octave.Key);
+                        Console.ForegroundColor = ConsoleColor.Gray;
+                        Console.WriteLine("\t数量为" + octave.Count());
+                    });
                     Console.WriteLine("音轨解析完毕");
                 }
                 i++;
