@@ -12,7 +12,7 @@ namespace 原神自动弹奏器
 {
     public partial class ImportMidiForm : Form
     {
-        public Action<int, int, bool> clickAction;
+        public Action<int, int, bool,int> clickAction;
         public ImportMidiForm()
         {
             InitializeComponent();
@@ -22,7 +22,8 @@ namespace 原神自动弹奏器
         {
             int noteBais = int.Parse(note_Bais.Text);
             int octaveBais = int.Parse(octave_Bais.Text);
-            clickAction(noteBais, octaveBais, isDebugMode.Checked);
+            int deltaTime = int.Parse(time.Text);
+            clickAction(noteBais, octaveBais, isDebugMode.Checked ,deltaTime);
             DialogResult = DialogResult.OK;
         }
     }

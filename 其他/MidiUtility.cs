@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using Commons.Music.Midi;
 using System.IO;
 
 namespace 原神自动弹奏器
@@ -14,6 +13,7 @@ namespace 原神自动弹奏器
         public static int noteBais = 0;
         public static int octaveBais = 0;
         public static bool isDebugMode = false;
+        private static int delatTime;
         public static List<NoteScore> notes = new List<NoteScore>();
         public static int standardOctave => notes.Min(note => note.octave) + 1 + octaveBais;
         public class NoteScore
@@ -108,12 +108,13 @@ namespace 原神自动弹奏器
                 return " ";
             }
         }
-        public static void Init(int noteBais, int octaveBais, bool isDebugMode)
+        public static void Init(int noteBais, int octaveBais, bool isDebugMode, int delatTime)
         {
             notes.Clear();
             MidiUtility.noteBais = noteBais;
             MidiUtility.octaveBais = octaveBais;
             MidiUtility.isDebugMode = isDebugMode;
+            MidiUtility.delatTime = delatTime;
         }
         public static void AddNote(NoteScore note)
         {
@@ -122,16 +123,6 @@ namespace 原神自动弹奏器
                 notes.Add(note);
 
             }
-        }
-        public static int GetBPM(FileInfo midnFIle)
-        {
-            var access = MidiAccessManager.Default;
-            var output = access.OpenOutputAsync(access.Outputs.Last().Id).Result;
-            var music = MidiMusic.Read(File.OpenRead(midnFIle.FullName));
-            var player = new MidiPlayer(music, output);
-            int bpm = player.Bpm;
-            player.Dispose();
-            return bpm;
         }
         public static string TransToYuanShenPu()
         {
@@ -164,40 +155,61 @@ namespace 原神自动弹奏器
             Console.WriteLine(output); ;
             return output;
         }
+        public static void Analysics(FileInfo midiFileInfo)
+        {
+            Console.WriteLine($"//////////////////////////////////开始解析{midiFileInfo.Name}////////////////////////////////////////////////");
+            MidiFile midiFile = MidiFile.Read(midiFileInfo.FullName);
+            Console.WriteLine("检测到音轨数" + midiFile.Chunks.Count);
+            int i = 0;
+            foreach (var trackChunk in midiFile.Chunks.OfType<TrackChunk>())
+            {
+                var targetNotes = trackChunk.ManageNotes().Notes.Where(note => note.Channel == 0).ToList();
+                if (targetNotes.Any())
+                {
+                    Console.WriteLine("----------------开始解析音轨" + i+"-----------------------");
+                    var notesTime = targetNotes.Select(x => (int)x.Time).Distinct().ToList();
+                    var datas = Enumerable.Range(0, notesTime.Count()).ToList().Select(num => new { 音符播放时间 = notesTime[num], 与上一音符间隔时间 = notesTime[num] - (num == 0 ? 0 : notesTime[num - 1]) });
+                    Console.WriteLine("----------打印音符间存在时间间隔及数量");
+                    datas.GroupBy(data => data.与上一音符间隔时间).OrderBy(time=>time.Key).ToList().ForEach(data => Console.WriteLine("间隔" + data.Key + "数量为" + data.Count()));
+                    Console.WriteLine();
+                    Console.WriteLine("----------包含的十二平均律为");
+                    var notelist = targetNotes.GroupBy(note => note.NoteName).OrderBy(x => x.Key).ToList();
+                    notelist.ForEach(noteName => Console.WriteLine(noteName.Key+"\t数量为"+noteName.Count()));
+                    Console.WriteLine(notelist.Count < 8 ? "数量小于8，大概可以解析" : "数量大于7,可能有和弦,解析效果不好");
+                    Console.WriteLine();
+                    Console.WriteLine("----------包含的八度为");
+                    var octavelist = targetNotes.GroupBy(note => note.Octave).OrderBy(x => x.Key).ToList();
+                    octavelist.ForEach(octave => Console.WriteLine(octave.Key + "\t数量为" + octave.Count()));
+                    //Console.WriteLine("可能为x调");
+                    Console.WriteLine("音轨解析完毕");
+                }
+                i++;
+            }
+            Console.WriteLine($"//////////////////////////////////{midiFileInfo.Name}解析完毕////////////////////////////////////////////////");
+        }
+
         public static string Export(FileInfo midiFileInfo)
         {
             int i = 0;
             string output = "";
             MidiFile midiFile = MidiFile.Read(midiFileInfo.FullName);
-            System.Reflection.PropertyInfo propertyInfo = midiFile.TimeDivision.GetType().GetProperty("TicksPerQuarterNote");
-            int bpm = int.Parse(propertyInfo.GetValue(midiFile.TimeDivision).ToString());
-
             foreach (var trackChunk in midiFile.Chunks.OfType<TrackChunk>())
             {
-
                 var list = trackChunk.ManageNotes().Notes.ToList();
                 if (list.Any())
                 {
-                    Console.WriteLine("开始解析音轨" + i);
+                    Console.WriteLine("开始翻译音轨" + i);
                     int start = (int)list[0].Time;
-                    int templength = ((int)list[0].Length);
-                    int length = templength % 120 == 0 ? templength : ((templength / 120) + 1) * 120;
                     List<Note> targetNotes = list.Where(note => note.Channel == 0).ToList();
-                    Console.WriteLine("包含的平均十二律为");
-                    targetNotes.Select(note => note.NoteName).Distinct().OrderBy(x => x).ToList()
-                        .ForEach(noteName => Console.WriteLine(noteName));
-                    Console.WriteLine("可能为x调");
                     MidiUtility.notes.Clear();
-                    Console.WriteLine("bpm为" + bpm);
                     targetNotes.ForEach(note =>
                     {
-                        int rank = (int)(note.Time - start) / bpm;
-                        MidiUtility.AddNote(new MidiUtility.NoteScore(rank, note.NoteName.ToString(), note.Octave));
+                        int rank = (int)(note.Time - start) / delatTime;
+                        MidiUtility.AddNote(new NoteScore(rank, note.NoteName.ToString(), note.Octave));
                     });
-                    //var s = MidiUtility.notes;
                     string YuanShenPu = MidiUtility.TransToYuanShenPu();
                     if (output == "") output = YuanShenPu;
-                    Console.WriteLine("音轨解析完毕");
+                    Console.WriteLine("音轨翻译完毕");
                 }
                 i++;
             }

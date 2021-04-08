@@ -42,8 +42,9 @@
             // 
             // btn_play
             // 
-            this.btn_play.BackColor = System.Drawing.Color.SeaGreen;
-            this.btn_play.Font = new System.Drawing.Font("宋体", 19F);
+            this.btn_play.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.btn_play.Font = new System.Drawing.Font("宋体", 19.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.btn_play.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.btn_play.Location = new System.Drawing.Point(111, 377);
             this.btn_play.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btn_play.Name = "btn_play";
@@ -69,8 +70,9 @@
             // 
             // btn_Stop
             // 
-            this.btn_Stop.BackColor = System.Drawing.Color.Tomato;
-            this.btn_Stop.Font = new System.Drawing.Font("宋体", 19F);
+            this.btn_Stop.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.btn_Stop.Font = new System.Drawing.Font("宋体", 19.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.btn_Stop.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.btn_Stop.Location = new System.Drawing.Point(466, 377);
             this.btn_Stop.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btn_Stop.Name = "btn_Stop";
@@ -116,7 +118,7 @@
             // 
             // button1
             // 
-            this.button1.BackColor = System.Drawing.Color.Transparent;
+            this.button1.BackColor = System.Drawing.SystemColors.ActiveCaption;
             this.button1.Font = new System.Drawing.Font("宋体", 9F);
             this.button1.Location = new System.Drawing.Point(665, 11);
             this.button1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -135,11 +137,12 @@
             this.cm_midi.Name = "cm_midi";
             this.cm_midi.Size = new System.Drawing.Size(159, 23);
             this.cm_midi.TabIndex = 7;
+            this.cm_midi.SelectedIndexChanged += new System.EventHandler(this.cm_midi_SelectedIndexChanged);
             this.cm_midi.Click += new System.EventHandler(this.cm_midi_Click);
             // 
             // btn__load
             // 
-            this.btn__load.BackColor = System.Drawing.Color.Transparent;
+            this.btn__load.BackColor = System.Drawing.SystemColors.ActiveCaption;
             this.btn__load.Font = new System.Drawing.Font("宋体", 9F);
             this.btn__load.Location = new System.Drawing.Point(605, 11);
             this.btn__load.Name = "btn__load";
@@ -167,12 +170,13 @@
             this.Controls.Add(this.btn_Stop);
             this.Controls.Add(this.text_music);
             this.Controls.Add(this.btn_play);
+            this.DoubleBuffered = true;
             this.ForeColor = System.Drawing.SystemColors.ControlText;
             this.KeyPreview = true;
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "Form1";
             this.Opacity = 0.9D;
-            this.Text = "原神自动演奏机 -- made by 格子";
+            this.Text = "原神自动演奏机 V4.6-- made by 格子";
             this.ResumeLayout(false);
             this.PerformLayout();
 

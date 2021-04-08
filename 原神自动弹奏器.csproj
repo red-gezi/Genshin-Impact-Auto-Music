@@ -40,12 +40,6 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="alsa-sharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\managed-midi.1.9.14\lib\net45\alsa-sharp.dll</HintPath>
-    </Reference>
-    <Reference Include="Commons.Music.Midi, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\managed-midi.1.9.14\lib\net45\Commons.Music.Midi.dll</HintPath>
-    </Reference>
     <Reference Include="Costura, Version=5.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\Costura.Fody.5.1.0\lib\netstandard1.0\Costura.dll</HintPath>
     </Reference>
