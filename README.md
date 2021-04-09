@@ -1,7 +1,7 @@
 # 原神自动弹奏器
  
 ## 音痴和手残福利，一键读简谱弹奏想要的音乐
-## [下载地址](https://github.com/red-gezi/Genshin-Impact-Auto-Music/releases/tag/1.0)
+## [下载地址（点我）](https://github.com/red-gezi/Genshin-Impact-Auto-Music/releases)
 # 项目介绍
 本软件通过解析简谱，然后通过模拟键盘演奏实现游戏内自动演奏
 # 使用说明
