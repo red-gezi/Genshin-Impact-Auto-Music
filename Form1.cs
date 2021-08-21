@@ -1,6 +1,7 @@
 ﻿using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Interaction;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -9,11 +10,16 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+
+
 namespace 原神自动弹奏器
 {
     public partial class Form1 : Form
     {
         bool isStop;
+
+        [System.Runtime.InteropServices.DllImportAttribute("user32.dll", EntryPoint = "keybd_event")]
+        public static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, uint dwExtraInfo);
 
         public Form1()
         {
@@ -55,15 +61,17 @@ namespace 原神自动弹奏器
                   for (int i = 0; i < music_score.Count; i++)
                   {
                       music_score[i] = music_score[i].Replace("(", "").Replace(")", "");
-                      for (int j = 0; j < music_score[i].Count(); j++)
+
+                      Console.Write(music_score[i]);
+                      for (int j = 0; j < music_score[i].Length; j++)
                       {
-                          string key = GetKeyMap(music_score[i][j].ToString());
-                          Console.Write(music_score[i][j].ToString());
-                          Action keyAction = () => SendKeys.Send(key);
-                          Invoke(keyAction);
+                          keybd_event((byte)music_score[i][j], 0, 0, 0);
+                          keybd_event((byte)music_score[i][j], 0, 2, 0);
                       }
+
                       await Task.Delay(int.Parse(delayTime.Text));
                       if (isStop) { break; }
+                      
                   }
               });
         }
@@ -124,6 +132,7 @@ namespace 原神自动弹奏器
         private void btn__load_Click(object sender, EventArgs e)
         {
             FileInfo midiFile = (FileInfo)cm_midi.SelectedItem;
+            if (midiFile == null) return;
             ImportMidiForm importMidiForm = new ImportMidiForm();
             importMidiForm.clickAction = MidiUtility.Init;
             importMidiForm.ShowDialog();
